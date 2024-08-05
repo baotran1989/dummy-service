@@ -2,14 +2,14 @@ name: 'ci'
 
 on:
   push:
-    branches: [ 'development' ]
+    branches: [ 'release' ]
   pull_request:
     types: [ opened, edited, reopened, synchronize, review_requested ]
     branches: [ '*' ]
   workflow_call:
 
 env:
-  TAG_PREFIX: 'v'
+  TAG_PREFIX: 'sanbox'
 
 jobs:
   BuildAndUnitTests:
@@ -79,17 +79,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Get current date and commit hash
-        id: vars
-        run: |
-          echo "CURRENT_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
       - name: Build and push container image to registry
         uses: docker/build-push-action@v5
         with:
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:dev-${{ env.CURRENT_DATE }}-${{ github.sha }}
-            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:dev-${{ env.CURRENT_DATE }}
+            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox
           file: ./Dockerfile
           context: ./
       - name: Set output docker image
@@ -98,12 +94,51 @@ jobs:
           echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
 
-  DeployToK8s:
+
+
+
+  DeployToSanbox:
     needs: [ ReleaseDryRun, BuildAndPushDockerImage ]
     if: |
-      (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/dev-cicd')
+      (github.ref == 'refs/heads/release')
       && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
     runs-on: ubuntu-latest
+    Enviroment:
+      name: sanbox
+    steps:
+      - name: Dummy
+        run: |
+          echo "VERSION=${{ needs.ReleaseDryRun.outputs.VERSION }}"
+          echo "RELEASE_NOTES=${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}"
+          echo "DOCKER_IMAGE_TAG=${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Replace docker image in file deployment
+        run: |
+          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment.yaml
+          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment-frontend-2.yaml
+          sed -i 's|DOCKER_IMAGE_BACKEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/backend/deployment.yaml
+      - name: Deploy Frontend
+        run: |
+          #          kubectl apply -f deployments/frontend/deployment.yaml
+               cat deployments/frontend/deployment.yaml
+      - name: Deploy Frontend 2
+        run: |
+          #          kubectl apply -f deployments/frontend/deployment-frontend-2.yaml
+               cat deployments/frontend/deployment-frontend-2.yaml
+      - name: Deploy Backend
+        run: |
+          #          kubectl apply -f deployments/backend/deployment.yaml
+               cat deployments/backend/deployment.yaml
+
+  DeployToProduction:
+    needs: [ ReleaseDryRun, BuildAndPushDockerImage, DeployToSanbox ]
+    if: |
+      (github.ref == 'refs/heads/release')
+      && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
+    runs-on: ubuntu-latest
+    Enviroment:
+      name: production
     steps:
       - name: Dummy
         run: |
