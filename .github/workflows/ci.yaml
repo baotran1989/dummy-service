@@ -28,48 +28,13 @@ jobs:
       - name: Test
         run: dotnet test --no-build --configuration Release
 
-  ReleaseDryRun:
-    needs: [ BuildAndUnitTests ]
-    if: |
-      github.event_name == 'push'
-    runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
-    outputs:
-      RESULT: ${{ steps.release_dry_run.outputs.result }}
-      VERSION: ${{ steps.release_dry_run.outputs.releaseVersion }}
-      RELEASE_NOTES: ${{ steps.release_dry_run.outputs.releaseNotes }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-      - name: Install Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-      - name: Release (dry-run)
-        id: release_dry_run
-        uses: btnguyen2k/action-semrelease@v3
-        with:
-          dry-run: true
-          auto-mode: true
-          github-token: ${{ secrets.GH_TOKEN }}
-          tag-major-release: false
-          tag-minor-release: false
-          branches: ${{ github.ref_name }}
-          tag-prefix: ${{ env.TAG_PREFIX }}
-          tag-only: true
-
   BuildAndPushDockerImage:
-    needs: [ ReleaseDryRun ]
-    if: |
-      github.ref == 'refs/heads/development' || github.ref == 'refs/heads/dev-cicd'
-      || ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
+    needs: [ BuildAndUnitTests ]
+    if: github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
     outputs:
       DOCKER_IMAGE_TAG: ${{ steps.set_docker_image.outputs.DOCKER_IMAGE_TAG }}
     steps:
-      - name: Dummy
-        run: |
-          echo "VERSION=${{ needs.ReleaseDryRun.outputs.VERSION }}"
-          echo "RELEASE_NOTES=${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}"
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Set up Docker
@@ -100,9 +65,7 @@ jobs:
 
   DeployToK8s:
     needs: [ ReleaseDryRun, BuildAndPushDockerImage ]
-    if: |
-      (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/dev-cicd')
-      && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
+    if: github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     steps:
       - name: Dummy
