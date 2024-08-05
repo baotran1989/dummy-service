@@ -16,7 +16,8 @@ jobs:
           curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
-          --data '{"event_type": "ping", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
+          --data '{"event_type": "ping", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          "ref_name": "'"$github.ref_name"'" }}'
       - name: ACK - Acknowledge pong from remote repository
         if: github.event.action == 'pong'
         run: |
