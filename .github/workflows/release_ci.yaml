@@ -5,7 +5,7 @@ on:
     branches: [ 'release' ]
   pull_request:
     types: [ opened, edited, reopened, synchronize, review_requested ]
-    branches: [ '*' ]
+    branches: [ 'release' ]
   workflow_call:
 
 env:

@@ -1,0 +1,31 @@
+name: Remote Dispatch Action Initiator
+
+on:
+  push:
+    branches: [ 'release', 'development' ]
+  schedule:
+    - cron: '0 12 * * *'
+  repository_dispatch:
+
+
+jobs:
+  ping-pong:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deploy DEV
+        if: github.ref == 'refs/heads/development'
+        run: |
+          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.GH_TOKEN }} \
+          --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          "ref_name": "'"${GITHUB_REF_NAME}"'",
+          "sha": "'"${GITHUB_SHA}"'"}}'
+      - name: Trigger Release
+        if: github.ref == 'refs/heads/release'
+        run: |
+          echo "PONG received from '${{ github.event.client_payload.repository }}'" && \
+          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.GH_TOKEN }} \
+          --data '{"event_type": "ack", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'" }}'
