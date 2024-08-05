@@ -2,6 +2,7 @@ name: Remote Dispatch Action Initiator
 
 on:
   push:
+    branches: [ 'release', 'development' ]
   schedule:
     - cron: '0 12 * * *'
   repository_dispatch:
@@ -11,8 +12,8 @@ jobs:
   ping-pong:
     runs-on: ubuntu-latest
     steps:
-      - name: PING - Dispatch initiating repository event
-        if: github.event.action != 'pong'
+      - name: Trigger Deploy DEV
+        if: github.ref == 'refs/heads/development'
         run: |
           curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
           -H 'Accept: application/vnd.github.everest-preview+json' \
@@ -20,8 +21,8 @@ jobs:
           --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
           "ref_name": "'"${GITHUB_REF_NAME}"'",
           "sha": "'"${GITHUB_SHA}"'"}}'
-      - name: ACK - Acknowledge pong from remote repository
-        if: github.event.action == 'pong'
+      - name: Trigger Release
+        if: github.ref == 'refs/heads/release'
         run: |
           echo "PONG received from '${{ github.event.client_payload.repository }}'" && \
           curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
