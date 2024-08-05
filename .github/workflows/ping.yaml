@@ -17,8 +17,8 @@ jobs:
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
           --data '{"event_type": "ping", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
-          "ref_name": "'"$github.ref_name"'",
-          "sha": "'$github.sha'"}}'
+          "ref_name": "'"${GITHUB_REF_NAME}"'",
+          "sha": "'"${GITHUB_SHA}"'"}}'
       - name: ACK - Acknowledge pong from remote repository
         if: github.event.action == 'pong'
         run: |
