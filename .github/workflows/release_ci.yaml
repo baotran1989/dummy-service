@@ -1,4 +1,4 @@
-name: 'ci'
+name: 'Release'
 
 on:
   push:
@@ -103,7 +103,7 @@ jobs:
       (github.ref == 'refs/heads/release')
       && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
     runs-on: ubuntu-latest
-    Enviroment:
+    enviroment:
       name: sanbox
     steps:
       - name: Dummy
@@ -134,7 +134,7 @@ jobs:
       (github.ref == 'refs/heads/release')
       && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
     runs-on: ubuntu-latest
-    Enviroment:
+    enviroment:
       name: production
     steps:
       - name: Dummy
