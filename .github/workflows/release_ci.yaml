@@ -9,7 +9,7 @@ on:
   workflow_call:
 
 env:
-  TAG_PREFIX: 'sanbox'
+  TAG_PREFIX: 'v'
 
 jobs:
   BuildAndUnitTests:
@@ -27,7 +27,6 @@ jobs:
         run: dotnet build --no-restore --configuration Release
       - name: Test
         run: dotnet test --no-build --configuration Release
-
   ReleaseDryRun:
     needs: [ BuildAndUnitTests ]
     if: |
@@ -56,7 +55,6 @@ jobs:
           branches: ${{ github.ref_name }}
           tag-prefix: ${{ env.TAG_PREFIX }}
           tag-only: true
-
   BuildAndPushDockerImage:
     needs: [ ReleaseDryRun ]
     if: |
