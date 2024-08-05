@@ -103,8 +103,7 @@ jobs:
       (github.ref == 'refs/heads/release')
       && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
     runs-on: ubuntu-latest
-    enviroment:
-      name: sanbox
+    enviroment: sanbox
     steps:
       - name: Dummy
         run: |
@@ -134,8 +133,7 @@ jobs:
       (github.ref == 'refs/heads/release')
       && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
     runs-on: ubuntu-latest
-    enviroment:
-      name: production
+    enviroment: production
     steps:
       - name: Dummy
         run: |
