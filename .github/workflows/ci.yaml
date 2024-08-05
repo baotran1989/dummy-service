@@ -1,0 +1,128 @@
+name: 'ci'
+
+on:
+  push:
+    branches: [ '*' ]
+  pull_request:
+    types: [ opened, edited, reopened, synchronize, review_requested ]
+    branches: [ '*' ]
+  workflow_call:
+
+env:
+  TAG_PREFIX: 'v'
+
+jobs:
+  BuildAndUnitTests:
+    runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up DotNet SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+      - name: Test
+        run: dotnet test --no-build --configuration Release
+
+  ReleaseDryRun:
+    needs: [ BuildAndUnitTests ]
+    if: |
+      github.event_name == 'push'
+    runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
+    outputs:
+      RESULT: ${{ steps.release_dry_run.outputs.result }}
+      VERSION: ${{ steps.release_dry_run.outputs.releaseVersion }}
+      RELEASE_NOTES: ${{ steps.release_dry_run.outputs.releaseNotes }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+      - name: Release (dry-run)
+        id: release_dry_run
+        uses: btnguyen2k/action-semrelease@v3
+        with:
+          dry-run: true
+          auto-mode: true
+          github-token: ${{ secrets.GH_TOKEN }}
+          tag-major-release: false
+          tag-minor-release: false
+          branches: ${{ github.ref_name }}
+          tag-prefix: ${{ env.TAG_PREFIX }}
+          tag-only: true
+
+  BuildAndPushDockerImage:
+    needs: [ ReleaseDryRun ]
+    if: |
+      github.ref == 'refs/heads/development' || github.ref == 'refs/heads/dev-cicd'
+      || ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
+    runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
+    outputs:
+      DOCKER_IMAGE_TAG: ${{ steps.set_docker_image.outputs.DOCKER_IMAGE_TAG }}
+    steps:
+      - name: Dummy
+        run: |
+          echo "VERSION=${{ needs.ReleaseDryRun.outputs.VERSION }}"
+          echo "RELEASE_NOTES=${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}"
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Get current date and commit hash
+        id: vars
+        run: |
+          echo "CURRENT_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:dev-${{ env.CURRENT_DATE }}-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:dev-${{ env.CURRENT_DATE }}
+          file: ./Dockerfile
+          context: ./
+      - name: Set output docker image
+        id: set_docker_image
+        run: |
+          echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+
+  DeployToK8s:
+    needs: [ ReleaseDryRun, BuildAndPushDockerImage ]
+    if: |
+      (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/dev-cicd')
+      && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
+    runs-on: izota
+    steps:
+      - name: Dummy
+        run: |
+          echo "VERSION=${{ needs.ReleaseDryRun.outputs.VERSION }}"
+          echo "RELEASE_NOTES=${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}"
+          echo "DOCKER_IMAGE_TAG=${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Replace docker image in file deployment
+        run: |
+          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment.yaml
+          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment-frontend-2.yaml
+          sed -i 's|DOCKER_IMAGE_BACKEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/backend/deployment.yaml
+      - name: Deploy Frontend
+        run: |
+          kubectl apply -f deployments/frontend/deployment.yaml
+      - name: Deploy Frontend 2
+        run: |
+          kubectl apply -f deployments/frontend/deployment-frontend-2.yaml
+      - name: Deploy Backend
+        run: |
+          kubectl apply -f deployments/backend/deployment.yaml
