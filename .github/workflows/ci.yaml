@@ -119,13 +119,10 @@ jobs:
           sed -i 's|DOCKER_IMAGE_BACKEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/backend/deployment.yaml
       - name: Deploy Frontend
         run: |
-#          kubectl apply -f deployments/frontend/deployment.yaml
           cat deployments/frontend/deployment.yaml
       - name: Deploy Frontend 2
         run: |
-#          kubectl apply -f deployments/frontend/deployment-frontend-2.yaml
           cat deployments/frontend/deployment-frontend-2.yaml
       - name: Deploy Backend
         run: |
-#          kubectl apply -f deployments/backend/deployment.yaml
           cat deployments/backend/deployment.yaml
