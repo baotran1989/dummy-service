@@ -1,7 +1,6 @@
 # poc-k8s-dummy-services
 The collection of dummy services to test the k8s features
 
-
 API:
 1. [GET] /api/healthz
 2. [GET] /api/crash
