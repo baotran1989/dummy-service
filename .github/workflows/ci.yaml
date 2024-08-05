@@ -63,8 +63,8 @@ jobs:
           echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
 
-  DeployToK8s:
-    needs: [ ReleaseDryRun, BuildAndPushDockerImage ]
+  DeployToDev:
+    needs: [ BuildAndPushDockerImage ]
     if: github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     steps:
