@@ -9,7 +9,7 @@ on:
   workflow_call:
 
 env:
-  TAG_PREFIX: 'v'
+  TAG_PREFIX: 'sanbox-'
   URL_REPO_BUILD: 'https://api.github.com/repos/baotran1989/build_and_deploy/dispatches'
 
 jobs:
@@ -113,8 +113,8 @@ jobs:
         with:
           allowUpdates: true
           token: ${{ secrets.GH_TOKEN }}
-          name: ${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox
-          tag: ${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox
+          name: sanbox-${{ needs.ReleaseDryRun.outputs.VERSION }}
+          tag: sanbox-${{ needs.ReleaseDryRun.outputs.VERSION }}
           body: ${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}
       - name: Trigger Deploy Sanbox
         run: |
