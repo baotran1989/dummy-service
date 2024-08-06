@@ -90,7 +90,7 @@ jobs:
       - name: Set output docker image
         id: set_docker_image
         run: |
-          echo "DOCKER_IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox" >> "$GITHUB_OUTPUT"
+          echo "DOCKER_IMAGE_TAG=${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox" >> "$GITHUB_OUTPUT"
 
 
   DeployToSanbox:
@@ -108,6 +108,14 @@ jobs:
           echo "DOCKER_IMAGE_TAG=${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"
       - name: Checkout code
         uses: actions/checkout@v3
+      name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        token: ${{ secrets.GH_TOKEN }}
+        name: ${{ needs.ReleaseDryRun.outputs.VERSION }}
+        tag: ${{ needs.ReleaseDryRun.outputs.VERSION }}
+        body: ${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}
       - name: Trigger Deploy Sanbox
         run: |
           curl -X POST ${{ env.URL_REPO_BUILD }} \
