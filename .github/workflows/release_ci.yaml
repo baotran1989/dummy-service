@@ -3,9 +3,9 @@ name: 'Release'
 on:
   push:
     branches: [ 'release' ]
-  pull_request:
-    types: [ opened, edited, reopened, synchronize, review_requested ]
-    branches: [ 'release' ]
+#  pull_request:
+#    types: [ opened, edited, reopened, synchronize, review_requested ]
+#    branches: [ 'release' ]
   workflow_call:
 
 env:
