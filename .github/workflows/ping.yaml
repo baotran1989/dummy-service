@@ -2,9 +2,9 @@ name: Remote Dispatch Action Initiator
 
 on:
   push:
-    branches: [ 'release', 'development' ]
-  schedule:
-    - cron: '0 12 * * *'
+    branches: [ '123' ]
+#  schedule:
+#    - cron: '0 12 * * *'
   repository_dispatch:
 
 

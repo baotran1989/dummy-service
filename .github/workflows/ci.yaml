@@ -62,29 +62,18 @@ jobs:
         run: |
           echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
-  DeployToDev:
+  TriggerDeployDev:
     needs: [ BuildAndPushDockerImage ]
     if: github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     steps:
-      - name: Dummy
+      - name: Trigger Deploy DEV
+        if: github.ref == 'refs/heads/development'
         run: |
-          echo "VERSION=${{ needs.ReleaseDryRun.outputs.VERSION }}"
-          echo "RELEASE_NOTES=${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}"
-          echo "DOCKER_IMAGE_TAG=${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Replace docker image in file deployment
-        run: |
-          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment.yaml
-          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment-frontend-2.yaml
-          sed -i 's|DOCKER_IMAGE_BACKEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/backend/deployment.yaml
-      - name: Deploy Frontend
-        run: |
-          cat deployments/frontend/deployment.yaml
-      - name: Deploy Frontend 2
-        run: |
-          cat deployments/frontend/deployment-frontend-2.yaml
-      - name: Deploy Backend
-        run: |
-          cat deployments/backend/deployment.yaml
+          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.GH_TOKEN }} \
+          --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          "ref_name": "'"${GITHUB_REF_NAME}"'",
+          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "sha": "'"${GITHUB_SHA}"'"}}'

@@ -10,6 +10,7 @@ on:
 
 env:
   TAG_PREFIX: 'v'
+  URL_REPO_BUILD: 'https://api.github.com/repos/baotran1989/build_and_deploy/dispatches'
 
 jobs:
   BuildAndUnitTests:
@@ -89,10 +90,7 @@ jobs:
       - name: Set output docker image
         id: set_docker_image
         run: |
-          echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
-
-
-
+          echo "DOCKER_IMAGE_TAG=${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox" >> "$GITHUB_OUTPUT"
 
 
   DeployToSanbox:
@@ -110,20 +108,16 @@ jobs:
           echo "DOCKER_IMAGE_TAG=${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Replace docker image in file deployment
+      - name: Trigger Deploy Sanbox
         run: |
-          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment.yaml
-          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment-frontend-2.yaml
-          sed -i 's|DOCKER_IMAGE_BACKEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/backend/deployment.yaml
-      - name: Deploy Frontend
-        run: |
-          cat deployments/frontend/deployment.yaml
-      - name: Deploy Frontend 2
-        run: |
-          cat deployments/frontend/deployment-frontend-2.yaml
-      - name: Deploy Backend
-        run: |
-          cat deployments/backend/deployment.yaml
+          curl -X POST ${{ env.URL_REPO_BUILD }} \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.GH_TOKEN }} \
+          --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          "ref_name": "'"${GITHUB_REF_NAME}"'",
+          "environment": "sanbox",
+          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "sha": "'"${GITHUB_SHA}"'"}}'
 
   DeployToProduction:
     needs: [ ReleaseDryRun, BuildAndPushDockerImage, DeployToSanbox ]
@@ -140,17 +134,13 @@ jobs:
           echo "DOCKER_IMAGE_TAG=${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: Replace docker image in file deployment
+      - name: Trigger Deploy Sanbox
         run: |
-          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment.yaml
-          sed -i 's|DOCKER_IMAGE_FRONTEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/frontend/deployment-frontend-2.yaml
-          sed -i 's|DOCKER_IMAGE_BACKEND|${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}|g' deployments/backend/deployment.yaml
-      - name: Deploy Frontend
-        run: |
-          cat deployments/frontend/deployment.yaml
-      - name: Deploy Frontend 2
-        run: |
-          cat deployments/frontend/deployment-frontend-2.yaml
-      - name: Deploy Backend
-        run: |
-          cat deployments/backend/deployment.yaml
+          curl -X POST ${{ env.URL_REPO_BUILD }} \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.GH_TOKEN }} \
+          --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          "ref_name": "'"${GITHUB_REF_NAME}"'",
+          "environment": "production",
+          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "sha": "'"${GITHUB_SHA}"'"}}'
