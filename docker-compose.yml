@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  izota-api:
+    build:
+      context: .
+    container_name: izota-api
+    image: izota-api
+    ports:
+      - "8089:8080"
+    environment:
+      - AppSettings__ExternalAPIMessageA=http://localhost:8080/api/backend/message-a
+      - AppSettings__ExternalAPIMessageB=http://localhost:8080/api/backend/message-b
+      - AppSettings__ExternalAPIMessageC=http://localhost:8080/api/backend/message-c
+      - AppSettings__StartupTime = 30

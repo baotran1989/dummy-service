@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: izota-dummy-deployment
+  namespace: dev-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: izota-dummy
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: izota-dummy
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: izota-dummy
+          image: DOCKER_IMAGE_FRONTEND
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+            limits:
+              cpu: "200m"
+          env:
+          - name: AppSettings__ExternalAPIMessageA
+            value: "http://izota-dummy-service.dev-backend.svc.cluster.local/api/backend/message-a"
+          - name: AppSettings__ExternalAPIMessageB
+            value: "http://izota-dummy-service.dev-backend.svc.cluster.local/api/backend/message-b"
+          - name: AppSettings__ExternalAPIMessageC
+            value: "http://izota-dummy-service.dev-backend.svc.cluster.local/api/backend/message-c"
+          - name: AppSettings__StartupTime
+            value: "35"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: izota-dummy-service
+  namespace: dev-frontend
+spec:
+  selector:
+    app: izota-dummy
+  ports:
+    - port: 80
+      targetPort: 8080
+
+#---
+#apiVersion: networking.k8s.io/v1
+#kind: Ingress
+#metadata:
+#  name: izota-dummy
+#  namespace: dev-frontend
+#spec:
+#  ingressClassName: nginx
+#  rules:
+#    - host: izota-dummy.mpire.asia
+#      http:
+#        paths:
+#          - backend:
+#              service:
+#                name: izota-dummy-service
+#                port:
+#                  number: 80
+#            path: /
+#            pathType: Prefix

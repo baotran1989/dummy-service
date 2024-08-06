@@ -1,0 +1,79 @@
+name: 'ci'
+
+on:
+  push:
+    branches: [ 'development' ]
+  pull_request:
+    types: [ opened, edited, reopened, synchronize, review_requested ]
+    branches: [ 'development' ]
+  workflow_call:
+
+env:
+  TAG_PREFIX: 'v'
+
+jobs:
+  BuildAndUnitTests:
+    runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up DotNet SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+      - name: Test
+        run: dotnet test --no-build --configuration Release
+
+  BuildAndPushDockerImage:
+    needs: [ BuildAndUnitTests ]
+    if: github.ref == 'refs/heads/development'
+    runs-on: ubuntu-latest # Lưu ý: lúc build có thể dùng public runner cho nhanh
+    outputs:
+      DOCKER_IMAGE_TAG: ${{ steps.set_docker_image.outputs.DOCKER_IMAGE_TAG }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Get current date and commit hash
+        id: vars
+        run: |
+          echo "CURRENT_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:dev-${{ env.CURRENT_DATE }}-${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/izota-dummy:dev-${{ env.CURRENT_DATE }}
+          file: ./Dockerfile
+          context: ./
+      - name: Set output docker image
+        id: set_docker_image
+        run: |
+          echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
+
+  TriggerDeployDev:
+    needs: [ BuildAndPushDockerImage ]
+    if: github.ref == 'refs/heads/development'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Deploy DEV
+        if: github.ref == 'refs/heads/development'
+        run: |
+          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          -H 'Accept: application/vnd.github.everest-preview+json' \
+          -u ${{ secrets.GH_TOKEN }} \
+          --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          "ref_name": "'"${GITHUB_REF_NAME}"'",
+          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "sha": "'"${GITHUB_SHA}"'"}}'

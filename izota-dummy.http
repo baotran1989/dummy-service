@@ -1,0 +1,6 @@
+@izota_dummy_HostAddress = http://localhost:5293
+
+GET {{izota_dummy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
