@@ -154,6 +154,7 @@ jobs:
           docker pull ${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox
           docker tag ${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}-sanbox ${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}
 
+
       - name: Push Docker image
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/izota-dummy:${{ needs.ReleaseDryRun.outputs.VERSION }}
