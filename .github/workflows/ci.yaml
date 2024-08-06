@@ -62,7 +62,6 @@ jobs:
         run: |
           echo "DOCKER_IMAGE_TAG=dev-${{ env.CURRENT_DATE }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
 
-
   DeployToDev:
     needs: [ BuildAndPushDockerImage ]
     if: github.ref == 'refs/heads/development'
