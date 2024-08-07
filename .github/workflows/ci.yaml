@@ -72,5 +72,5 @@ jobs:
           -u ${{ secrets.GH_TOKEN }} \
           --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
           "ref_name": "'"${GITHUB_REF_NAME}"'",
-          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "docker_image_tag": "'"${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
           "sha": "'"${GITHUB_SHA}"'"}}'
