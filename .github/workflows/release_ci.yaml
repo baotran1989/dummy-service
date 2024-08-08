@@ -11,6 +11,7 @@ on:
 env:
   TAG_PREFIX: 'sanbox-'
   URL_REPO_DEPLOY: 'https://api.github.com/repos/baotran1989/deployment/dispatches'
+  EVENT_TYPE: 'dummy_service_release'
 
 jobs:
   BuildAndUnitTests:
@@ -121,7 +122,7 @@ jobs:
           curl -X POST ${{ env.URL_REPO_DEPLOY }} \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
-          --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          --data '{"event_type": "'"${{env.EVENT_TYPE}}"'", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
           "ref_name": "'"${GITHUB_REF_NAME}"'",
           "environment": "sanbox",
           "docker_image_tag": "'"${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
