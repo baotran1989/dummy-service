@@ -15,7 +15,7 @@ jobs:
       - name: Trigger Deploy DEV
         if: github.ref == 'refs/heads/development'
         run: |
-          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          curl -X POST https://api.github.com/repos/baotran1989/deployment/dispatches \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
           --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
@@ -24,7 +24,7 @@ jobs:
       - name: Trigger Release
         if: github.ref == 'refs/heads/release'
         run: |
-          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          curl -X POST https://api.github.com/repos/baotran1989/deployment/dispatches \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
           --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",

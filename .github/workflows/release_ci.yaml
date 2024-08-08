@@ -10,7 +10,7 @@ on:
 
 env:
   TAG_PREFIX: 'sanbox-'
-  URL_REPO_BUILD: 'https://api.github.com/repos/baotran1989/build_and_deploy/dispatches'
+  URL_REPO_DEPLOY: 'https://api.github.com/repos/baotran1989/deployment/dispatches'
 
 jobs:
   BuildAndUnitTests:
@@ -118,7 +118,7 @@ jobs:
           body: ${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}
       - name: Trigger Deploy Sanbox
         run: |
-          curl -X POST ${{ env.URL_REPO_BUILD }} \
+          curl -X POST ${{ env.URL_REPO_DEPLOY }} \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
           --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
@@ -169,7 +169,7 @@ jobs:
           body: ${{ needs.ReleaseDryRun.outputs.RELEASE_NOTES }}
       - name: Trigger Deploy Production
         run: |
-          curl -X POST ${{ env.URL_REPO_BUILD }} \
+          curl -X POST ${{ env.URL_REPO_DEPLOY }} \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
           --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
