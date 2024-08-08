@@ -27,7 +27,7 @@ namespace IzotaDummy.Controllers
         public async Task<IActionResult> GetMessageA()
         {
             
-            string apiEndpoint = Environment.GetEnvironmentVariable("AppSettings__ExternalAPIMessageA");
+            string apiEndpoint = Environment.GetEnvironmentVariable("ExternalAPIMessageA");
             string externalApiUrl = String.IsNullOrEmpty(apiEndpoint) ? _appSettings.ExternalAPIMessageA : apiEndpoint;
             return await GetMessage(externalApiUrl);
         }
@@ -36,7 +36,7 @@ namespace IzotaDummy.Controllers
         public async Task<IActionResult> GetMessageB()
         {
             // string externalApiUrl = _appSettings.ExternalAPIMessageB;
-            string apiEndpoint = Environment.GetEnvironmentVariable("AppSettings__ExternalAPIMessageB");
+            string apiEndpoint = Environment.GetEnvironmentVariable("ExternalAPIMessageB");
             string externalApiUrl = String.IsNullOrEmpty(apiEndpoint) ? _appSettings.ExternalAPIMessageB : apiEndpoint;
             return await GetMessage(externalApiUrl);
         }
@@ -45,7 +45,7 @@ namespace IzotaDummy.Controllers
         public async Task<IActionResult> GetMessageC()
         {
             // string externalApiUrl = _appSettings.ExternalAPIMessageC;
-            string apiEndpoint = Environment.GetEnvironmentVariable("AppSettings__ExternalAPIMessageC");
+            string apiEndpoint = Environment.GetEnvironmentVariable("ExternalAPIMessageC");
             string externalApiUrl = String.IsNullOrEmpty(apiEndpoint) ? _appSettings.ExternalAPIMessageC : apiEndpoint;
             return await GetMessage(externalApiUrl);
         }

@@ -5,7 +5,7 @@ using IzotaDummy.Services;
 
 Timer? timer = null;
 
-int secondInit = int.TryParse(Environment.GetEnvironmentVariable("AppSettings__StartupTime"), out int result) ? result : 25;
+int secondInit = int.TryParse(Environment.GetEnvironmentVariable("StartupTime"), out int result) ? result : 25;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +24,9 @@ builder.Services.AddControllers();
 builder.Services.AddSingleton<RabbitMQService>(sp =>
 {
     // var config = sp.GetRequiredService<IConfiguration>().GetSection("RabbitMQ");
-    var hostName =  Environment.GetEnvironmentVariable("AppSettings__MQHost") ?? "localhost";//config["HostName"];
-    var userName = Environment.GetEnvironmentVariable("AppSettings__MQUserName") ?? "izota";//config["UserName"];
-    var password = Environment.GetEnvironmentVariable("AppSettings__MQPassword") ?? "123qwe";//config["Password"];
+    var hostName =  Environment.GetEnvironmentVariable("MQHost") ?? "localhost";//config["HostName"];
+    var userName = Environment.GetEnvironmentVariable("MQUserName") ?? "izota";//config["UserName"];
+    var password = Environment.GetEnvironmentVariable("MQPassword") ?? "123qwe";//config["Password"];
     return new RabbitMQService(hostName, userName, password);
 });
 
