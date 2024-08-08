@@ -100,7 +100,7 @@ jobs:
       (github.ref == 'refs/heads/release')
       && ${{ needs.ReleaseDryRun.outputs.VERSION }} == 'SUCCESS'
     runs-on: ubuntu-latest
-    environment: sanbox
+    environment: sandbox
     steps:
       - name: Dummy
         run: |
