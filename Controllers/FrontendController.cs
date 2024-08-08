@@ -23,6 +23,7 @@ namespace IzotaDummy.Controllers
 
         }
 
+
         [HttpGet("get-message-a")]
         public async Task<IActionResult> GetMessageA()
         {
