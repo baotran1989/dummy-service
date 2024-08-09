@@ -11,7 +11,6 @@ namespace IzotaDummy.Controllers
     {
         readonly int secondInit = int.TryParse(Environment.GetEnvironmentVariable("StartupTime"), out int result) ? result : 25;
 
-
         [HttpGet("healthz")]
         public IActionResult Healthz()
         {
