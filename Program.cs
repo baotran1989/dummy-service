@@ -33,8 +33,6 @@ builder.Services.AddSingleton<RabbitMQService>(sp =>
 builder.Services.AddHostedService<RabbitMQBackgroundService>();
 
 
-
-
 var app = builder.Build();
 // var delayInSeconds = 20; // Khởi tạo giá trị delay mặc định là 20 giây
 
