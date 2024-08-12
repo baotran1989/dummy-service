@@ -15,7 +15,7 @@ namespace IzotaDummy.Controllers {
         public PostgresController()
         {
 
-            string connectionStringENV = Environment.GetEnvironmentVariable("AppSettings__PostgresConnectionString");
+            string connectionStringENV = Environment.GetEnvironmentVariable("PostgresConnectionString");
             
             _connectionString = String.IsNullOrEmpty(connectionStringENV) ? _connectionString : connectionStringENV;
 
