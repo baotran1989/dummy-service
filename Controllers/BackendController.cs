@@ -37,7 +37,7 @@ namespace IzotaDummy.Controllers
             return Ok(new
             {
                 status = 200,
-                message = "Message from backend endpoint C "
+                message = "Message from backend endpoint C"
             });
         }
     }
