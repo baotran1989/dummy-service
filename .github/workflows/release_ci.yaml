@@ -176,5 +176,5 @@ jobs:
           --data '{"event_type": "dummy_service_release", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
           "ref_name": "'"${GITHUB_REF_NAME}"'",
           "environment": "production",
-          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "docker_image_tag": "'"${{ needs.ReleaseDryRun.outputs.VERSION }}"'",
           "sha": "'"${GITHUB_SHA}"'"}}'
