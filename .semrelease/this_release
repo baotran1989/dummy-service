@@ -1,40 +1,4 @@
-    - a
-    - Fix CI/CD
-    - Refactored the authentication system, now using OAuth 2.0, breaking backward compatibility.
-    - fix typo
-    - fix typo
-    Merge pull request #6 from baotran1989/fix-typo
-    
-    - fix typo
-    - fix typo
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - fix release
-    - fix release
-    - Add comment to cpu controller
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - test deploy
-    - change config map
-    - CI: Fix env naming
-    - CI: Add env
-    - update url repo
-    fix: correct typo
-    fix: correct typo
-    fix: correct typo
-    fix: correct typo
-    fix: correct typo
-    fix: correct typo
-    fix: correct typo
-    - test release_ci.yaml
+- Added support for uploading profile pictures in user settings.
+- Introduced a new feature to export reports in PDF format.
+- Implemented multi-language support across the platform.
+- Added new filtering options to the data table component
