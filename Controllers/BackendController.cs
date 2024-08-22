@@ -17,7 +17,7 @@ namespace IzotaDummy.Controllers
             return Ok(new
             {
                 status = 200,
-                message = "Message from backend endpoint A"
+                message = "Message from backend endpoint A 1"
             });
         }
 
