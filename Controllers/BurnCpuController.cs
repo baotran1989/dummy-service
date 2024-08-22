@@ -24,6 +24,7 @@ namespace IzotaDummy.Controllers
             //     burningTask = Task.Run(() => BurnCPU());
             // }
 
+            Console.WriteLine("Start burn");
             if (burningTask == null || burningTask.IsCompleted)
             {
                 cancellationTokenSource = new CancellationTokenSource();
@@ -42,8 +43,11 @@ namespace IzotaDummy.Controllers
             //     burningCPU = false;
             //     burningTask.Wait();
             // }
+
+            Console.WriteLine("Check have task burn cpu");
             if (burningTask != null && !burningTask.IsCompleted)
             {
+                Console.WriteLine("Stop burn");
                 cancellationTokenSource.Cancel();
                 burningTask.Wait(); // Chờ tác vụ hoàn thành
             }

@@ -14,7 +14,7 @@ namespace IzotaDummy.Controllers {
 
         public MongoController()
         {
-            string connectionStringENV = Environment.GetEnvironmentVariable("AppSettings__MongoConnectionString");
+            string connectionStringENV = Environment.GetEnvironmentVariable("MongoConnectionString");
             string connectionString = String.IsNullOrEmpty(connectionStringENV) ? "mongodb://izota:123qwe@localhost:27017" : connectionStringENV;
    
             var client = new MongoClient(connectionString);

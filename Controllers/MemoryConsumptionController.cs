@@ -48,7 +48,6 @@ namespace IzotaDummy.Controllers
            return ResponseMemory();
         }
 
-
         // Phương thức để allocate/deallocate memory và cập nhật biến global
         private static void AllocateMemory(int sizeMb)
         {

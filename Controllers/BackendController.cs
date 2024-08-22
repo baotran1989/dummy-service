@@ -10,7 +10,6 @@ namespace IzotaDummy.Controllers
     [Route("/api/backend/")]
     public class BackendController : ControllerBase
     {
-        
 
         [HttpGet("message-a")]
         public async Task<IActionResult> GetMessageA()
@@ -18,7 +17,7 @@ namespace IzotaDummy.Controllers
             return Ok(new
             {
                 status = 200,
-                message = "Message from backend endpoint A"
+                message = "Message from backend endpoint A 1"
             });
         }
 
@@ -43,5 +42,4 @@ namespace IzotaDummy.Controllers
         }
     }
 
-    
 }

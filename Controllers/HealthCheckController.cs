@@ -9,7 +9,8 @@ namespace IzotaDummy.Controllers
     [Route("/api/")]
     public class HealthCheckController : ControllerBase
     {
-        readonly int secondInit = int.TryParse(Environment.GetEnvironmentVariable("AppSettings__StartupTime"), out int result) ? result : 25;
+        readonly int secondInit = int.TryParse(Environment.GetEnvironmentVariable("StartupTime"), out int result) ? result : 25;
+
 
 
         [HttpGet("healthz")]

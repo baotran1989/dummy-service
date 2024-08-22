@@ -3,13 +3,12 @@ name: 'ci'
 on:
   push:
     branches: [ 'development' ]
-  pull_request:
-    types: [ opened, edited, reopened, synchronize, review_requested ]
-    branches: [ 'development' ]
   workflow_call:
 
 env:
   TAG_PREFIX: 'v'
+  URL_REPO_DEPLOY: 'https://api.github.com/repos/baotran1989/deployment/dispatches'
+  EVENT_TYPE: 'dummy_service_development'
 
 jobs:
   BuildAndUnitTests:
@@ -70,10 +69,10 @@ jobs:
       - name: Trigger Deploy DEV
         if: github.ref == 'refs/heads/development'
         run: |
-          curl -X POST https://api.github.com/repos/baotran1989/build_and_deploy/dispatches \
+          curl -X POST ${{ env.URL_REPO_DEPLOY }} \
           -H 'Accept: application/vnd.github.everest-preview+json' \
           -u ${{ secrets.GH_TOKEN }} \
-          --data '{"event_type": "dummy_service_development", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
+          --data '{"event_type": "'"${{env.EVENT_TYPE}}"'", "client_payload": { "repository": "'"$GITHUB_REPOSITORY"'",
           "ref_name": "'"${GITHUB_REF_NAME}"'",
-          "docker_image_tag": "'"{{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
+          "docker_image_tag": "'"${{ needs.BuildAndPushDockerImage.outputs.DOCKER_IMAGE_TAG }}"'",
           "sha": "'"${GITHUB_SHA}"'"}}'
