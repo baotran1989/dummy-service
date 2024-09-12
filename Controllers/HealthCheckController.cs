@@ -39,7 +39,7 @@ namespace IzotaDummy.Controllers
                 message = "Service is ready", // Thông điệp
                 data = new { 
                     countTime = countTime
-                } // Dữ liệu cụ thể, nếu có
+                }
             };
 
             if(countTime < secondInit) {
